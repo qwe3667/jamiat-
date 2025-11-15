@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Jamiat Bahawalpur - Islamic Organization Portal for managing messages, programs, and attendance tracking">
+    <title>Jamiat Bahawalpur - Islamic Organization Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-wrapper">
+                    <img src="assets/logo.jpg" alt="Jamiat Logo" class="logo-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="logo-circle" style="display:none;">
+                        <span>JB</span>
+                    </div>
+                </div>
+                <div class="header-text">
+                    <h1>Jamiat Bahawalpur</h1>
+                    <p>Islamic Organization Portal</p>
+                </div>
+            </div>
+        </header>
+
+        <nav class="tabs-desktop" role="navigation" aria-label="Main navigation">
+            <button class="tab-btn active" data-tab="messages" aria-label="Messages tab">
+                <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                <span>Messages</span>
+            </button>
+            <button class="tab-btn" data-tab="programs" aria-label="Programs tab">
+                <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span>Programs</span>
+            </button>
+            <button class="tab-btn" data-tab="attendance" aria-label="Attendance tab">
+                <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                <span>Attendance</span>
+            </button>
+        </nav>
+
+        <main class="main-content">
+            <div id="messages-tab" class="tab-content active">
+                <div class="section-header">
+                    <h2>Messages</h2>
+                    <button class="btn-primary" id="add-message-btn" data-testid="button-add-message">
+                        <svg class="btn-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <span>Add Message</span>
+                    </button>
+                </div>
+                <div id="messages-list" data-testid="list-messages"></div>
+            </div>
+
+            <div id="programs-tab" class="tab-content">
+                <div class="section-header">
+                    <h2>Programs & Events</h2>
+                    <button class="btn-primary" id="add-program-btn" data-testid="button-add-program">
+                        <svg class="btn-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <span>Add Program</span>
+                    </button>
+                </div>
+                <div id="programs-list" data-testid="list-programs"></div>
+            </div>
+
+            <div id="attendance-tab" class="tab-content">
+                <div class="section-header">
+                    <h2>Attendance Tracking</h2>
+                    <div class="attendance-actions">
+                        <button class="btn-primary" id="add-member-btn" data-testid="button-add-member">
+                            <svg class="btn-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            <span>Add Member</span>
+                        </button>
+                        <button class="btn-primary" id="mark-attendance-btn" data-testid="button-mark-attendance">
+                            <svg class="btn-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                            </svg>
+                            <span>Mark Attendance</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="members-list" data-testid="list-members"></div>
+            </div>
+        </main>
+
+        <nav class="tabs-mobile" role="navigation" aria-label="Mobile navigation">
+            <button class="mobile-tab active" data-tab="messages" aria-label="Messages">
+                <svg class="mobile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                <span>Messages</span>
+            </button>
+            <button class="mobile-tab" data-tab="programs" aria-label="Programs">
+                <svg class="mobile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span>Programs</span>
+            </button>
+            <button class="mobile-tab" data-tab="attendance" aria-label="Attendance">
+                <svg class="mobile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                <span>Attendance</span>
+            </button>
+        </nav>
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay"></div>
+
+    <div id="message-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Message</h3>
+                <button class="close-btn" aria-label="Close modal">&times;</button>
+            </div>
+            <form id="message-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="message-title">Title *</label>
+                        <input type="text" id="message-title" name="title" required data-testid="input-message-title" placeholder="Enter message title">
+                    </div>
+                    <div class="form-group">
+                        <label for="message-content">Content *</label>
+                        <textarea id="message-content" name="content" rows="4" required data-testid="input-message-content" placeholder="Write your message here..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="message-images">Images (optional)</label>
+                        <input type="file" id="message-images" name="images" multiple accept="image/*" data-testid="input-message-images">
+                        <div id="message-image-preview" class="image-preview-grid"></div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary cancel-btn" data-testid="button-cancel">Cancel</button>
+                    <button type="submit" class="btn-primary" data-testid="button-submit-message">
+                        <span>Add Message</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="program-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Program</h3>
+                <button class="close-btn" aria-label="Close modal">&times;</button>
+            </div>
+            <form id="program-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="program-title">Title *</label>
+                        <input type="text" id="program-title" name="title" required data-testid="input-program-title" placeholder="Program or event name">
+                    </div>
+                    <div class="form-group">
+                        <label for="program-description">Description *</label>
+                        <textarea id="program-description" name="description" rows="4" required data-testid="input-program-description" placeholder="Describe the program..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="program-date">Date & Time *</label>
+                            <input type="datetime-local" id="program-date" name="date" required data-testid="input-program-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="program-location">Location *</label>
+                            <input type="text" id="program-location" name="location" required data-testid="input-program-location" placeholder="Event location">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="program-featured-image">Featured Image (optional)</label>
+                        <input type="file" id="program-featured-image" name="featuredImage" accept="image/*" data-testid="input-program-featured">
+                        <div id="program-featured-preview" class="image-preview-single"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="program-gallery-images">Gallery Images (optional)</label>
+                        <input type="file" id="program-gallery-images" name="galleryImages" multiple accept="image/*" data-testid="input-program-gallery">
+                        <div id="program-gallery-preview" class="image-preview-grid"></div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary cancel-btn" data-testid="button-cancel">Cancel</button>
+                    <button type="submit" class="btn-primary" data-testid="button-submit-program">
+                        <span>Add Program</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="member-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Member</h3>
+                <button class="close-btn" aria-label="Close modal">&times;</button>
+            </div>
+            <form id="member-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="member-name">Name *</label>
+                        <input type="text" id="member-name" name="name" required data-testid="input-member-name" placeholder="Full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="member-phone">Phone *</label>
+                        <input type="tel" id="member-phone" name="phone" required data-testid="input-member-phone" placeholder="+92 300 1234567">
+                    </div>
+                    <div class="form-group">
+                        <label for="member-email">Email (optional)</label>
+                        <input type="email" id="member-email" name="email" data-testid="input-member-email" placeholder="email@example.com">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary cancel-btn" data-testid="button-cancel">Cancel</button>
+                    <button type="submit" class="btn-primary" data-testid="button-submit-member">
+                        <span>Add Member</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="attendance-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Mark Attendance</h3>
+                <button class="close-btn" aria-label="Close modal">&times;</button>
+            </div>
+            <form id="attendance-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="program-select">Select Program *</label>
+                        <select name="program" id="program-select" required data-testid="select-program">
+                            <option value="">Choose a program...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Members *</label>
+                        <div id="members-checklist" data-testid="checklist-members"></div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary cancel-btn" data-testid="button-cancel">Cancel</button>
+                    <button type="submit" class="btn-primary" data-testid="button-submit-attendance">
+                        <span>Mark Attendance</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="delete-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Delete</h3>
+                <button class="close-btn" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="delete-warning">
+                    <svg class="warning-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <p id="delete-message" data-testid="text-delete-message"></p>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary cancel-btn" data-testid="button-cancel">Cancel</button>
+                <button type="button" class="btn-danger" id="confirm-delete-btn" data-testid="button-confirm-delete">
+                    <svg class="btn-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    <span>Delete</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="java.js"></script>
+</body>
+</html>
