@@ -39,10 +39,12 @@ let deleteTarget = null;
 
 function showLoading(show = true) {
   const overlay = document.getElementById('loading-overlay');
-  if (show) {
-    overlay.classList.add('active');
-  } else {
-    overlay.classList.remove('active');
+  if (overlay) {
+    if (show) {
+      overlay.classList.add('active');
+    } else {
+      overlay.classList.remove('active');
+    }
   }
 }
 
@@ -82,18 +84,26 @@ function switchTab(tabName) {
 }
 
 function openModal(modalId) {
-  document.getElementById('modal-overlay').classList.add('active');
-  document.getElementById(modalId).classList.add('active');
+  const overlay = document.getElementById('modal-overlay');
+  const modal = document.getElementById(modalId);
+  if (overlay && modal) {
+    overlay.classList.add('active');
+    modal.classList.add('active');
+  }
 }
 
 function closeModal(modalId) {
-  document.getElementById('modal-overlay').classList.remove('active');
-  document.getElementById(modalId).classList.remove('active');
-  if (modalId !== 'delete-modal') {
-    const form = document.getElementById(`${modalId.replace('-modal', '-form')}`);
-    if (form) {
-      form.reset();
-      clearImagePreviews();
+  const overlay = document.getElementById('modal-overlay');
+  const modal = document.getElementById(modalId);
+  if (overlay && modal) {
+    overlay.classList.remove('active');
+    modal.classList.remove('active');
+    if (modalId !== 'delete-modal') {
+      const form = document.getElementById(`${modalId.replace('-modal', '-form')}`);
+      if (form) {
+        form.reset();
+        clearImagePreviews();
+      }
     }
   }
 }
@@ -140,7 +150,7 @@ async function uploadImage(file, path) {
   try {
     const timestamp = Date.now();
     const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const filename = `${safeName}_${timestamp}`;
+    const filename = `${timestamp}_${safeName}`;
     const storageRef = ref(storage, `${path}/${filename}`);
     
     await uploadBytes(storageRef, file);
@@ -357,8 +367,10 @@ function updateAttendanceModal() {
 
 function confirmDelete(type, id, name) {
   deleteTarget = { type, id };
-  document.getElementById('delete-message').textContent = 
-    `Are you sure you want to delete "${name}"? This action cannot be undone.`;
+  const deleteMessage = document.getElementById('delete-message');
+  if (deleteMessage) {
+    deleteMessage.textContent = `Are you sure you want to delete "${name}"? This action cannot be undone.`;
+  }
   openModal('delete-modal');
 }
 
@@ -492,161 +504,198 @@ document.querySelectorAll('.tab-btn, .mobile-tab').forEach(btn => {
 
 document.querySelectorAll('.close-btn, .cancel-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    closeModal(btn.closest('.modal').id);
+    const modal = btn.closest('.modal');
+    if (modal) {
+      closeModal(modal.id);
+    }
   });
 });
 
-document.getElementById('modal-overlay').addEventListener('click', () => {
-  document.querySelectorAll('.modal.active').forEach(modal => {
-    closeModal(modal.id);
+const modalOverlay = document.getElementById('modal-overlay');
+if (modalOverlay) {
+  modalOverlay.addEventListener('click', () => {
+    document.querySelectorAll('.modal.active').forEach(modal => {
+      closeModal(modal.id);
+    });
   });
-});
+}
 
-document.getElementById('add-message-btn').addEventListener('click', () => openModal('message-modal'));
-document.getElementById('add-program-btn').addEventListener('click', () => openModal('program-modal'));
-document.getElementById('add-member-btn').addEventListener('click', () => openModal('member-modal'));
-document.getElementById('mark-attendance-btn').addEventListener('click', () => openModal('attendance-modal'));
-document.getElementById('confirm-delete-btn').addEventListener('click', performDelete);
+const addMessageBtn = document.getElementById('add-message-btn');
+if (addMessageBtn) {
+  addMessageBtn.addEventListener('click', () => openModal('message-modal'));
+}
+
+const addProgramBtn = document.getElementById('add-program-btn');
+if (addProgramBtn) {
+  addProgramBtn.addEventListener('click', () => openModal('program-modal'));
+}
+
+const addMemberBtn = document.getElementById('add-member-btn');
+if (addMemberBtn) {
+  addMemberBtn.addEventListener('click', () => openModal('member-modal'));
+}
+
+const markAttendanceBtn = document.getElementById('mark-attendance-btn');
+if (markAttendanceBtn) {
+  markAttendanceBtn.addEventListener('click', () => openModal('attendance-modal'));
+}
+
+const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+if (confirmDeleteBtn) {
+  confirmDeleteBtn.addEventListener('click', performDelete);
+}
 
 setupImagePreview('message-images', 'message-image-preview');
 setupImagePreview('program-featured-image', 'program-featured-preview');
 setupImagePreview('program-gallery-images', 'program-gallery-preview');
 
-document.getElementById('message-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
-  
-  try {
-    showLoading(true);
-    const images = [];
+const messageForm = document.getElementById('message-form');
+if (messageForm) {
+  messageForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
     
-    const files = formData.getAll('images');
-    for (const file of files) {
-      if (file && file.size > 0) {
-        const url = await uploadImage(file, 'messages');
-        images.push(url);
+    try {
+      showLoading(true);
+      const images = [];
+      
+      const files = formData.getAll('images');
+      for (const file of files) {
+        if (file && file.size > 0) {
+          const url = await uploadImage(file, 'messages');
+          images.push(url);
+        }
       }
-    }
-    
-    await addDoc(collection(db, 'messages'), {
-      title: formData.get('title'),
-      content: formData.get('content'),
-      images,
-      createdAt: new Date().toISOString()
-    });
-    
-    closeModal('message-modal');
-    showNotification('Message added successfully!', 'success');
-  } catch (error) {
-    console.error('Error adding message:', error);
-    showNotification('Failed to add message. Please try again.', 'error');
-  } finally {
-    showLoading(false);
-  }
-});
-
-document.getElementById('program-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
-  
-  try {
-    showLoading(true);
-    
-    let featuredImage = null;
-    const featuredFile = formData.get('featuredImage');
-    if (featuredFile && featuredFile.size > 0) {
-      featuredImage = await uploadImage(featuredFile, 'programs/featured');
-    }
-    
-    const galleryImages = [];
-    const galleryFiles = formData.getAll('galleryImages');
-    for (const file of galleryFiles) {
-      if (file && file.size > 0) {
-        const url = await uploadImage(file, 'programs/gallery');
-        galleryImages.push(url);
-      }
-    }
-    
-    await addDoc(collection(db, 'programs'), {
-      title: formData.get('title'),
-      description: formData.get('description'),
-      date: new Date(formData.get('date')).toISOString(),
-      location: formData.get('location'),
-      featuredImage,
-      galleryImages,
-      createdAt: new Date().toISOString()
-    });
-    
-    closeModal('program-modal');
-    showNotification('Program added successfully!', 'success');
-  } catch (error) {
-    console.error('Error adding program:', error);
-    showNotification('Failed to add program. Please try again.', 'error');
-  } finally {
-    showLoading(false);
-  }
-});
-
-document.getElementById('member-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
-  
-  try {
-    showLoading(true);
-    
-    await addDoc(collection(db, 'members'), {
-      name: formData.get('name'),
-      phone: formData.get('phone'),
-      email: formData.get('email') || null
-    });
-    
-    closeModal('member-modal');
-    showNotification('Member added successfully!', 'success');
-  } catch (error) {
-    console.error('Error adding member:', error);
-    showNotification('Failed to add member. Please try again.', 'error');
-  } finally {
-    showLoading(false);
-  }
-});
-
-document.getElementById('attendance-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
-  const programId = formData.get('program');
-  const selectedMembers = Array.from(document.querySelectorAll('input[name="members"]:checked')).map(cb => cb.value);
-  
-  if (!programId || selectedMembers.length === 0) {
-    showNotification('Please select a program and at least one member', 'error');
-    return;
-  }
-  
-  try {
-    showLoading(true);
-    
-    const program = programs.find(p => p.id === programId);
-    
-    for (const memberId of selectedMembers) {
-      const member = members.find(m => m.id === memberId);
-      await addDoc(collection(db, 'attendance'), {
-        programId,
-        memberId,
-        programTitle: program.title,
-        memberName: member.name,
-        date: program.date,
+      
+      await addDoc(collection(db, 'messages'), {
+        title: formData.get('title'),
+        content: formData.get('content'),
+        images,
         createdAt: new Date().toISOString()
       });
+      
+      closeModal('message-modal');
+      showNotification('Message added successfully!', 'success');
+    } catch (error) {
+      console.error('Error adding message:', error);
+      showNotification('Failed to add message. Please try again.', 'error');
+    } finally {
+      showLoading(false);
+    }
+  });
+}
+
+const programForm = document.getElementById('program-form');
+if (programForm) {
+  programForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    try {
+      showLoading(true);
+      
+      let featuredImage = null;
+      const featuredFile = formData.get('featuredImage');
+      if (featuredFile && featuredFile.size > 0) {
+        featuredImage = await uploadImage(featuredFile, 'programs/featured');
+      }
+      
+      const galleryImages = [];
+      const galleryFiles = formData.getAll('galleryImages');
+      for (const file of galleryFiles) {
+        if (file && file.size > 0) {
+          const url = await uploadImage(file, 'programs/gallery');
+          galleryImages.push(url);
+        }
+      }
+      
+      await addDoc(collection(db, 'programs'), {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        date: new Date(formData.get('date')).toISOString(),
+        location: formData.get('location'),
+        featuredImage,
+        galleryImages,
+        createdAt: new Date().toISOString()
+      });
+      
+      closeModal('program-modal');
+      showNotification('Program added successfully!', 'success');
+    } catch (error) {
+      console.error('Error adding program:', error);
+      showNotification('Failed to add program. Please try again.', 'error');
+    } finally {
+      showLoading(false);
+    }
+  });
+}
+
+const memberForm = document.getElementById('member-form');
+if (memberForm) {
+  memberForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    try {
+      showLoading(true);
+      
+      await addDoc(collection(db, 'members'), {
+        name: formData.get('name'),
+        phone: formData.get('phone'),
+        email: formData.get('email') || null
+      });
+      
+      closeModal('member-modal');
+      showNotification('Member added successfully!', 'success');
+    } catch (error) {
+      console.error('Error adding member:', error);
+      showNotification('Failed to add member. Please try again.', 'error');
+    } finally {
+      showLoading(false);
+    }
+  });
+}
+
+const attendanceForm = document.getElementById('attendance-form');
+if (attendanceForm) {
+  attendanceForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const programId = formData.get('program');
+    const selectedMembers = Array.from(document.querySelectorAll('input[name="members"]:checked')).map(cb => cb.value);
+    
+    if (!programId || selectedMembers.length === 0) {
+      showNotification('Please select a program and at least one member', 'error');
+      return;
     }
     
-    closeModal('attendance-modal');
-    showNotification(`Attendance marked for ${selectedMembers.length} member(s)!`, 'success');
-  } catch (error) {
-    console.error('Error marking attendance:', error);
-    showNotification('Failed to mark attendance. Please try again.', 'error');
-  } finally {
-    showLoading(false);
-  }
-});
+    try {
+      showLoading(true);
+      
+      const program = programs.find(p => p.id === programId);
+      
+      for (const memberId of selectedMembers) {
+        const member = members.find(m => m.id === memberId);
+        await addDoc(collection(db, 'attendance'), {
+          programId,
+          memberId,
+          programTitle: program.title,
+          memberName: member.name,
+          date: program.date,
+          createdAt: new Date().toISOString()
+        });
+      }
+      
+      closeModal('attendance-modal');
+      showNotification(`Attendance marked for ${selectedMembers.length} member(s)!`, 'success');
+    } catch (error) {
+      console.error('Error marking attendance:', error);
+      showNotification('Failed to mark attendance. Please try again.', 'error');
+    } finally {
+      showLoading(false);
+    }
+  });
+}
 
 window.openModal = openModal;
 window.closeModal = closeModal;
